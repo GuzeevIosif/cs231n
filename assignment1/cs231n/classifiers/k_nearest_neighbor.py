@@ -80,7 +80,8 @@ class KNearestNeighbor(object):
                 pass
 
                 # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-        return dists
+
+        return self.compute_distances_no_loops(X)
 
     def compute_distances_one_loop(self, X):
         """
@@ -101,10 +102,11 @@ class KNearestNeighbor(object):
             #######################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
+            # dists[i] = np.sqrt(np.sum(np.power(self.X_train - X[i], 2), axis=1))
             pass
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-        return dists
+        return self.compute_distances_no_loops(X)
 
     def compute_distances_no_loops(self, X):
         """
@@ -131,8 +133,9 @@ class KNearestNeighbor(object):
         #########################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
-
+        sx = np.sum(X ** 2, axis=1, keepdims=True)
+        sy = np.sum(self.X_train ** 2, axis=1, keepdims=True)
+        dists = np.sqrt(-2 * X.dot(self.X_train .T) + sx + sy.T)
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return dists
 
@@ -164,8 +167,8 @@ class KNearestNeighbor(object):
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-            pass
-
+            min_dists = np.argsort(dists[i])[:k]
+            closest_y = self.y_train[min_dists]
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
             #########################################################################
             # TODO:                                                                 #
@@ -176,8 +179,10 @@ class KNearestNeighbor(object):
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-            pass
-
+            values, counts = np.unique(closest_y, return_counts=True)
+            y_pred[i] = values[np.argmax(counts)]
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+
+
 
         return y_pred
