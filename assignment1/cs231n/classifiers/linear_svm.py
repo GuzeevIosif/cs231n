@@ -87,7 +87,7 @@ def svm_loss_vectorized(W, X, y, reg):
 
     loss = np.sum(loss, axis=1)
     loss = np.sum(loss) / loss.size
-    loss += 0.000005 * np.sum(W * W)
+    loss += reg * np.sum(W * W)
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
     #############################################################################

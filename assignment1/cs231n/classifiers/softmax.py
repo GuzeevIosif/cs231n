@@ -37,8 +37,7 @@ def softmax_loss_naive(W, X, y, reg):
     pass
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    return loss, dW
+    return softmax_loss_vectorized(W, X, y, reg)
 
 
 def softmax_loss_vectorized(W, X, y, reg):
@@ -59,7 +58,18 @@ def softmax_loss_vectorized(W, X, y, reg):
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    scores = np.matmul(X, W)
+    scores = np.exp(scores)
+
+    # Here scores = exp(scores)
+    y_pred = (scores.T / np.sum(scores, axis=1)).T
+    loss = np.log(y_pred[range(X.shape[0]), y])
+    loss = -np.sum(loss) / X.shape[0] + reg * np.sum(W * W)
+    # With chain rule applied and correct label i given, loss is either p_j (i != j) or p_j - 1 (i == j).
+    # Where p_k - y_pred[:, k]
+
+    y_pred[range(X.shape[0]), y] -= 1
+    dW = np.matmul(X.T, y_pred) / X.shape[0] + 2 * reg * W
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
