@@ -1,6 +1,4 @@
-from builtins import range
 import numpy as np
-
 
 
 def affine_forward(x, w, b):
@@ -27,8 +25,7 @@ def affine_forward(x, w, b):
     # will need to reshape the input into rows.                               #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
+    out = x.reshape(x.shape[0], np.prod(x.shape[1:])) @ w + b
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -61,7 +58,9 @@ def affine_backward(dout, cache):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    dw = x.reshape(x.shape[0], -1).T @ dout
+    dx = (dout @ w.T).reshape(x.shape)
+    db = dout.sum(axis=0)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -87,7 +86,7 @@ def relu_forward(x):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    out = np.clip(x, a_min=0.0, a_max=None)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -113,9 +112,9 @@ def relu_backward(dout, cache):
     # TODO: Implement the ReLU backward pass.                                 #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
-
+    clipped = np.clip(x, 0.0, None)
+    clipped[clipped > 0.0] = 1.0
+    dx = clipped * dout
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -773,7 +772,18 @@ def svm_loss(x, y):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    y_pred = x
+    loss = (y_pred.T - y_pred[range(x.shape[0]), y] + 1).T
+    loss[range(x.shape[0]), y] -= 1
+    loss[loss < 0.0] = 0.0
+
+    non_neg_loss_mask = (loss > 0.0).astype(int)
+
+    loss = np.sum(loss, axis=1)
+    loss = np.sum(loss) / loss.size
+
+    non_neg_loss_mask[range(x.shape[0]), y] = np.sum(non_neg_loss_mask, axis=1) * (-1)
+    dx = non_neg_loss_mask / x.shape[0]
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -803,7 +813,15 @@ def softmax_loss(x, y):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    scores = np.exp(x)
+    # Here scores = exp(scores)
+    y_pred = (scores.T / np.sum(scores, axis=1)).T
+    loss = np.log(y_pred[range(x.shape[0]), y])
+    loss = -np.sum(loss) / x.shape[0]
+    # With chain rule applied and correct label i given, loss is either p_j (i != j) or p_j - 1 (i == j).
+    # Where p_k - y_pred[:, k]
+    y_pred[range(x.shape[0]), y] -= 1
+    dx = y_pred / x.shape[0]
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
